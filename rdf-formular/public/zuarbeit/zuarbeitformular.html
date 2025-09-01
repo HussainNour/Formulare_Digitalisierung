@@ -602,6 +602,12 @@
 
     function nf(x){ const n = Number(x); return Number.isFinite(n) ? Math.max(0, n) : ''; }
 
+    function intOrEmpty(v) {
+      const m = String(v ?? '').match(/\d+/);
+      return m ? parseInt(m[0], 10) : '';
+    }
+
+
     function setSemesterFromTurnus(turnus) {
       if (!turnus) return;
       const s = document.getElementById('semester');
@@ -707,7 +713,6 @@
 
       if (mod?.Turnus) setSemesterFromTurnus(mod.Turnus);
       setFakultaetSmart(mod.Fakultät || '');
-
       const sg = document.getElementById('studiengang');
       if (sg) setIfEmpty(sg, (Array.isArray(mod.ZusammenMit) && mod.ZusammenMit.length) ? mod.ZusammenMit.join('+') : '');
 
@@ -719,6 +724,14 @@
         else if (!fa.value && mod?.Fachart && [...fa.options].some(o => o.value === mod.Fachart)) {
           fa.value = mod.Fachart;
         }
+
+      // Fachsemester aus dem Modul übernehmen
+      const fsEl = document.getElementById('fachsemester');
+      if (fsEl) {
+        const fs = intOrEmpty(mod.Fachsemester);
+        if (fs !== '') fsEl.value = fs; else fsEl.value = '';
+      }
+
       }
 
       const lv = mod?.Lehrveranstaltungen || {};
