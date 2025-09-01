@@ -645,16 +645,7 @@
       const sg = document.getElementById('studiengang');
       if (sg) setIfEmpty(sg, (Array.isArray(mod.ZusammenMit) && mod.ZusammenMit.length) ? mod.ZusammenMit.join('+') : '');
 
-      const fs = document.getElementById('fachsemester');
-      if (fs) setIfEmpty(fs, mod.Fachsemester || '');
 
-      const gruppenInput = document.getElementById('gruppen');
-      const auf = mod?.Lehrveranstaltungen?.Aufteilung;
-      if (gruppenInput && Array.isArray(auf) && auf.length){
-        const groups = auf.map(a => a.Gruppen).filter(Boolean);
-        if (!gruppenInput.value && groups.length) gruppenInput.value = groups.join(', ');
-        if (sg && !sg.value) sg.value = inferStudiengang(mod, auf[0]);
-      }
 
       const fa = document.getElementById('fachart');
       if (fa) {
