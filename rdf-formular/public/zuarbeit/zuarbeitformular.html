@@ -70,7 +70,7 @@
         </div>
         <div class="col-9">
           <label for="gruppen">Gruppen:</label>
-          <input id="gruppen" name="gruppen" type="text" placeholder="z. B. Gruppe 25INB-1, Gruppe 25MIB-1-2" />
+          <input id="gruppen" name="gruppen" type="text" placeholder="z. B. Gruppe 25INB-1, Gruppe 25MIB-1-2" />
         </div>
       </div>
     </fieldset>
@@ -78,14 +78,12 @@
     <fieldset>
       <legend>Modul / Lehrveranstaltung</legend>
 
-      <!-- NEU: Modul-Browser (Filter + Liste + Button) -->
+      <!-- Modul-Browser (Filter + Liste + Button) -->
       <div class="row" style="margin-bottom:10px;">
         <div class="col-12">
           <label for="modulSelect">Modul aus Liste auswählen:</label>
           <input id="moduleFilter" type="text" placeholder="Filtern nach Modulnr., Name, Verantwortliche …">
           <select id="modulSelect" size="10"></select>
-        </div>
-      </div>
         </div>
       </div>
 
@@ -195,6 +193,30 @@
       }
     }
 
+    // Neu: Parser + Planungssemester (nächstes Semester)
+    function parseSemester(label){
+      if (!label) return null;
+      const s = label.match(/^Sommersemester\s+(\d{4})/i);
+      if (s) return { type:'S', yStart: parseInt(s[1],10), yEnd: parseInt(s[1],10) };
+      const w = label.match(/^Wintersemester\s+(\d{4})\/(\d{2})/i);
+      if (w) {
+        const yStart = parseInt(w[1],10);
+        return { type:'W', yStart, yEnd: yStart+1 };
+      }
+      return null;
+    }
+    function getPlanningSemester(){
+      const cur = getCurrentSemester();
+      const info = parseSemester(cur);
+      if (!info) return cur;
+      if (info.type === 'S') {
+        const y = info.yStart;
+        return `Wintersemester ${y}/${(y+1).toString().slice(-2)}`;
+      } else {
+        return `Sommersemester ${info.yStart + 1}`;
+      }
+    }
+
     function fillSemesterList(selectId = 'semester', yearsBack = 5, yearsForward = 10) {
       const now = new Date();
       const currentYear = now.getFullYear();
@@ -210,12 +232,12 @@
 
       const select = document.getElementById(selectId);
       if (!select) return;
-      const currentSemester = getCurrentSemester();
+      const defaultSemester = getPlanningSemester(); // Planung: nächstes Semester
       semesterList.forEach(sem => {
         const opt = document.createElement('option');
         opt.value = sem;
         opt.textContent = sem;
-        if (sem === currentSemester) opt.selected = true;
+        if (sem === defaultSemester) opt.selected = true;
         select.appendChild(opt);
       });
     }
@@ -451,17 +473,86 @@
     }
     window.removePraktikumRow = removePraktikumRow;
 
-    // -------- planungsKalender.js --------
+    // -------- Abgabetermin automatisch aus Semester --------
+    function updateAbgabeterminFromSemester(){
+      const s = document.getElementById('semester');
+      const abgabe = document.getElementById('abgabetermin');
+      if (!s || !abgabe) return;
+      const info = parseSemester(s.value);
+      if (!info) return;
+
+      if (info.type === 'S') {
+        // SoSe YYYY -> 01.04.YYYY
+        abgabe.value = `${info.yStart}-04-01`;
+      } else {
+        // WiSe YYYY/YY -> 01.10.YYYY (kleinstes Jahr)
+        abgabe.value = `${info.yStart}-10-01`;
+      }
+    }
+
+    // -------- ISO-KW & Wochenbereiche für Semester --------
+    function isoWeekNumber(date){
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+    function weeksBetween(start, end){
+      const weeks = [];
+      const seen = new Set();
+      const d = new Date(start);
+      while (d <= end) {
+        const w = isoWeekNumber(d);
+        if (!seen.has(w)) { weeks.push(w); seen.add(w); }
+        d.setDate(d.getDate() + 1);
+      }
+      return weeks;
+    }
+    function getSelectedSemesterLabel(){
+      const sel = document.getElementById('semester');
+      return sel?.value || '';
+    }
+    function getWeeksForSemester(semLabel){
+      const info = parseSemester(semLabel);
+      if (!info) return [];
+      if (info.type === 'S') {
+        // SoSe: 01.04.–31.07. (+ Prüfungs-KW ~ Ende September)
+        const start = new Date(info.yStart, 3, 1);   // Apr
+        const end   = new Date(info.yStart, 6, 31);  // Jul
+        const weeks = weeksBetween(start, end);
+        const examW = isoWeekNumber(new Date(info.yStart, 8, 25)); // ~25. Sep (typ. KW ~39)
+        if (!weeks.includes(examW)) weeks.push(examW);
+        return weeks;
+      } else {
+        // WiSe: 01.10.–31.01. (Jahreswechsel)
+        const start = new Date(info.yStart,     9, 1);  // Oct
+        const end   = new Date(info.yStart + 1, 0, 31); // Jan
+        return weeksBetween(start, end);
+      }
+    }
+    function rebuildPlanungsKalenderTable(){
+      const container = document.getElementById("planungsKalender");
+      if (!container) return;
+      container.innerHTML = "";
+      if (typeof planungsKalenderZaehler !== 'undefined') planungsKalenderZaehler = 0;
+      addPlanungsKalenderRow();
+    }
+
+    // -------- planungsKalender.js (dynamische KWs) --------
     let planungsKalenderZaehler = 0;
     document.addEventListener("DOMContentLoaded", function () {
       const btn = document.getElementById("planungsKalenderAddBtn");
       if (btn) btn.addEventListener("click", addPlanungsKalenderRow);
-      addPlanungsKalenderRow(); // Immer mit einer Zeile starten
+
+      // nach dem Füllen der Semesterliste: Abgabetermin & KWs initial setzen
+      updateAbgabeterminFromSemester();
+      addPlanungsKalenderRow(); // Immer mit einer Zeile starten (dynamische KWs)
     });
 
     function addPlanungsKalenderRow() {
       const container = document.getElementById("planungsKalender");
-      const wochen = [15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,39];
+      const wochen = getWeeksForSemester(getSelectedSemesterLabel()); // <— dynamisch aus Semester
 
       let table = document.getElementById("planungsKalenderTable");
       if (!table) {
@@ -511,7 +602,7 @@
       const row2 = table.insertRow(-1);
       row2.setAttribute("data-id", zeilenId);
       wochen.forEach(w => {
-        if (w === 39) return; // schon oben
+        if (w === 39) return; // schon oben mit Rowspan
         const td = row2.insertCell();
         td.innerHTML = `<input type="text" name="kwtxt_${w}_${zeilenId}" style="width:32px;" placeholder="KW" title="Kurztext für KW ${w}">`;
       });
@@ -645,15 +736,13 @@
       const sg = document.getElementById('studiengang');
       if (sg) setIfEmpty(sg, (Array.isArray(mod.ZusammenMit) && mod.ZusammenMit.length) ? mod.ZusammenMit.join('+') : '');
 
-
-
       const fa = document.getElementById('fachart');
       if (fa) {
         const mt = (mod?.Modultyp || '').toString().trim().toUpperCase();
         if (mt === 'PF')      fa.value = 'Pflichtmodul';
         else if (mt === 'WPF') fa.value = 'Wahlpflichtmodul';
         else if (!fa.value && mod?.Fachart && [...fa.options].some(o => o.value === mod.Fachart)) {
-          fa.value = mod.Fachart; // Fallback, falls JSON statt Modultyp ein Klartextfeld hat
+          fa.value = mod.Fachart;
         }
       }
 
@@ -662,19 +751,15 @@
 
       // === NEU: Lesende automatisch ausfüllen (Name + Fakultät aus JSON) ===
 (function () {
-  // Aus JSON: { Modulverantwortliche: {Anrede, Vorname, Nachname}, Fakultät: "..." }
   const mv  = mod?.Modulverantwortliche || {};
   const fak = mod?.Fakultät || '';
   const fullname = [mv.Anrede, mv.Vorname, mv.Nachname]
     .filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
-  // Falls noch keine Lesende-Zeile existiert -> eine anlegen
   if (!document.querySelector('input[name^="lesende_name_"]')) {
     const btn = document.getElementById('lesendeAddBtn');
     if (btn) btn.click();
   }
-
-  // Erste Lesende-Zeile befüllen – nur wenn das Feld leer ist
   const nameInput = document.querySelector('input[name^="lesende_name_"]');
   const fakInput  = document.querySelector('input[name^="lesende_fakultaet_"]');
 
@@ -716,7 +801,9 @@
   }
 })();
 
-
+      // NEU: nach evtl. Semester-Setzung aus Modul -> Abgabetermin & KWs aktualisieren
+      updateAbgabeterminFromSemester();
+      rebuildPlanungsKalenderTable();
     }
 
     function applySelectedModule(){
@@ -750,6 +837,15 @@
         }
       });
 
+      // Semester-Änderung -> Abgabetermin & KW-Grid aktualisieren
+      const semSel = document.getElementById('semester');
+      if (semSel) {
+        semSel.addEventListener('change', () => {
+          updateAbgabeterminFromSemester();
+          rebuildPlanungsKalenderTable();
+        });
+      }
+
       loadModules();
     });
 
@@ -766,10 +862,18 @@
           if (mt === 'PF')      fa.value = 'Pflichtmodul';
           else if (mt === 'WPF') fa.value = 'Wahlpflichtmodul';
         }
+        // Falls Endpoint auch Semester liefert, kannst du hier optional s.value setzen und dann:
+        updateAbgabeterminFromSemester();
+        rebuildPlanungsKalenderTable();
       } catch (e) {
         console.warn("Konnte Moduldaten nicht laden:", e);
       }
     }
+
+    // Beim Laden sicherstellen, dass Abgabetermin initial korrekt ist
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAbgabeterminFromSemester();
+    });
   </script>
 
   <!-- Optionaler Offline-Fallback wie in Datei 1:
