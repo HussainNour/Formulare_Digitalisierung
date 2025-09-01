@@ -3,72 +3,41 @@
 @prefix : <http://example.org/data/> .
 
 
-:Zuarbeitsblatt_1756228568141 a ex:Zuarbeitsblatt ;
-  ex:abgabeterminDS "2025-08-05"^^xsd:date ;
+:Zuarbeitsblatt_1756743041526 a ex:Zuarbeitsblatt ;
+  ex:abgabeterminDS "2024-10-01"^^xsd:date ;
   ex:eingangDS "" ;
   ex:semester "Wintersemester 2024/25" ;
   ex:fakultaet "FIM-INF" ;
   ex:studiengang "INB+MIB" ;
-  ex:fachsemester 5 ;
-  ex:gruppen "" ;
+  ex:fs 1 ;
+  ex:gruppen "INB21+22" ;
   ex:anzahlStudierendeGruppen 0 ;
-  ex:modulnummer "C622" ;
-  ex:modulbezeichnung "Grundlagen der Künstlichen Intelligenz" ;
-  ex:teilmodulnummer "" ;
-  ex:teilmodulbezeichnung "" ;
+  ex:modulnr "C114" ;
+  ex:modulname "Modellierung" ;
+  ex:teilmodulnummer "nix" ;
+  ex:teilmodulbezeichnung "nix" ;
   ex:fachart "Pflichtmodul" ;
-  ex:swsV 2 ;
-  ex:swsS 2 ;
-  ex:swsP 0 ;
-  ex:raumV "Gu, Li, Tr" ;
-  ex:raumS "Z423, Z430" ;
+  ex:swsVorlesung 4 ;
+  ex:swsSeminar 2 ;
+  ex:swsPraktikum 0 ;
+  ex:raumV "gu300" ;
+  ex:raumS "z333" ;
   ex:raumP "" ;
   ex:technikV "Beamer/WLAN" ;
-  ex:technikS "" ;
+  ex:technikS "Beamer/WLAN" ;
   ex:technikP "" .
 
-:Zuarbeitsblatt_1756228568141 ex:lesende :Lesende_1756228568141_1, :Lesende_1756228568141_2 .
+:Zuarbeitsblatt_1756743041526 ex:lesende :Lesende_1756743041526_1 .
 
-:Lesende_1756228568141_1 a ex:Lesende ;
-  ex:fakultaet "dfgsdfgfd" ;
-  ex:gruppe "sdfgfdsgfd" ;
-  ex:erklaerung "sdfgsdfgfsdg" ;
-  ex:zugeordnetZu :Zuarbeitsblatt_1756228568141 .
-
-:Lesende_1756228568141_2 a ex:Lesende ;
-  ex:fakultaet "dsfgsdfgsdfg" ;
-  ex:gruppe "fdgsdgsdf" ;
-  ex:erklaerung "gdfsgsfd" ;
-  ex:zugeordnetZu :Zuarbeitsblatt_1756228568141 .
-
-:Seminarleiter_1756228568141_1 a ex:Seminarleiter ;
-  ex:fakultaet "dfsgfsdgsdf" ;
-  ex:gruppe "dfsgfdsgsfd" ;
-  ex:erklaerung "sdfgsfdgfd" ;
-  ex:zugeordnetZu :Zuarbeitsblatt_1756228568141 .
-  
-:Seminarleiter_1756228568141_2 a ex:Seminarleiter ;
-  ex:fakultaet "sdfgdfgdf" ;
-  ex:gruppe "sdfgsdfgsdf" ;
-  ex:erklaerung "sdfgsdfsgfd" ;
-  ex:zugeordnetZu :Zuarbeitsblatt_1756228568141 .
-  
-:Praktikum_1756228568141_1 a ex:Praktikumsverantwortlicher ;
-  ex:fakultaet "sdfgfdsgfsd" ;
-  ex:gruppe "dfsgdfggsfd" ;
-  ex:erklaerung "dfsgfdgssfdg" ;
-  ex:zugeordnetZu :Zuarbeitsblatt_1756228568141 .
-  
-:Praktikum_1756228568141_2 a ex:Praktikumsverantwortlicher ;
-  ex:fakultaet "fdsdfsgfgds" ;
-  ex:gruppe "fdgsgfdssdfg" ;
-  ex:erklaerung "fdgsfdgfdsg" ;
-  ex:zugeordnetZu :Zuarbeitsblatt_1756228568141 .
-  :Zuarbeitsblatt_1756228568141 ex:planungswunsch "1" .
-:Zuarbeitsblatt_1756228568141 ex:planungswunsch "2" .
-:Zuarbeitsblatt_1756228568141 ex:planungswunsch "3" .
-:Zuarbeitsblatt_1756228568141 ex:planungswunsch "4" .
-:Zuarbeitsblatt_1756228568141 ex:planungswunsch "5" .
-:Zuarbeitsblatt_1756228568141 ex:kw_27_1 "true" .
-:Zuarbeitsblatt_1756228568141 ex:kw_28_1 "true" .
+:Lesende_1756743041526_1 a ex:Lesende ;
+  ex:fakultaet "FIM-INF" ;
+  ex:name "Prof. Dr. rer. nat Sibylle Schwarz" ;
+  ex:gruppe "21inb 21imb" ;
+  ex:erklaerung "nix" ;
+  ex:zugeordnetZu :Zuarbeitsblatt_1756743041526 .
+:Zuarbeitsblatt_1756743041526 ex:kw_40_1 "true" .
+:Zuarbeitsblatt_1756743041526 ex:kw_42_1 "true" .
+:Zuarbeitsblatt_1756743041526 ex:kw_51_1 "true" .
+:Zuarbeitsblatt_1756743041526 ex:kw_2_1 "true" .
+:Zuarbeitsblatt_1756743041526 ex:kwtxt_4_1 "nix" .
 
