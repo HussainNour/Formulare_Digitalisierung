@@ -78,7 +78,7 @@
     <fieldset>
       <legend>Modul / Lehrveranstaltung</legend>
 
-      <!-- Modul-Browser (Filter + Liste + Button) -->
+      <!-- Modul-Browser (Filter + Liste) -->
       <div class="row" style="margin-bottom:10px;">
         <div class="col-12">
           <label for="modulSelect">Modul aus Liste auswählen:</label>
@@ -146,21 +146,9 @@
     </fieldset>
 
     <fieldset>
-      <legend>Wünsche zur Planung dieser Lehrveranstaltung</legend>
-      <div id="planungWuensche">
-        <label><input type="checkbox" name="planung_wunsch_1" checked> gleichmäßige Verteilung von Vorlesungen und Seminaren auf gerade und ungerade Wochen</label><br>
-        <label><input type="checkbox" name="planung_wunsch_2"> Vorlesungen in der einen und Seminare in der anderen Woche</label><br>
-        <label><input type="checkbox" name="planung_wunsch_3"> Blockplanung (2 Einheiten hintereinander) von Vorlesungen, Seminaren oder Praktika einer Seminargruppe</label><br>
-        <label><input type="checkbox" name="planung_wunsch_4"> <b>keine</b> Blockplanung in <b>einer</b> Seminargruppe</label><br>
-        <label><input type="checkbox" name="planung_wunsch_5"> Vorlesung <b>zwingend</b> vor Seminar</label><br>
-        <label><input name="planung_wunsch_andere" placeholder="anderer Wunsch" style="width:250px"></label>
-      </div>
-    </fieldset>
-
-    <fieldset>
       <legend>Konkrete Kalenderwochen</legend>
       <p>Ankreuzen oder beschriften:</p>
-      <button type="button" class="btn" id="planungsKalenderAddBtn">➕ Kalender-Zeile hinzufügen</button>
+      <!-- Button entfernt: Kalender-Zeile wird genau einmal erzeugt -->
       <div id="planungsKalender" style="margin-top:8px;"></div>
     </fieldset>
 
@@ -536,23 +524,20 @@
       if (!container) return;
       container.innerHTML = "";
       if (typeof planungsKalenderZaehler !== 'undefined') planungsKalenderZaehler = 0;
-      addPlanungsKalenderRow();
+      addPlanungsKalenderRow(); // erzeugt genau eine (Doppel-)Zeile
     }
 
-    // -------- planungsKalender.js (dynamische KWs) --------
+    // -------- planungsKalender.js (dynamische KWs; exakt eine Zeile) --------
     let planungsKalenderZaehler = 0;
     document.addEventListener("DOMContentLoaded", function () {
-      const btn = document.getElementById("planungsKalenderAddBtn");
-      if (btn) btn.addEventListener("click", addPlanungsKalenderRow);
-
       // nach dem Füllen der Semesterliste: Abgabetermin & KWs initial setzen
       updateAbgabeterminFromSemester();
-      addPlanungsKalenderRow(); // Immer mit einer Zeile starten (dynamische KWs)
+      addPlanungsKalenderRow(); // nur eine Zeile
     });
 
     function addPlanungsKalenderRow() {
       const container = document.getElementById("planungsKalender");
-      const wochen = getWeeksForSemester(getSelectedSemesterLabel()); // <— dynamisch aus Semester
+      const wochen = getWeeksForSemester(getSelectedSemesterLabel()); // dynamisch aus Semester
 
       let table = document.getElementById("planungsKalenderTable");
       if (!table) {
@@ -575,6 +560,10 @@
         container.appendChild(table);
       }
 
+      // Wenn bereits eine Datenzeile existiert, nicht noch eine hinzufügen
+      const hasRow = table.querySelector('tr[data-id]');
+      if (hasRow) return;
+
       planungsKalenderZaehler++;
       const zeilenId = planungsKalenderZaehler;
 
@@ -595,8 +584,7 @@
       const nameTd = row1.insertCell();
       nameTd.rowSpan = 2;
       nameTd.innerHTML = `
-        <input name="planungs_name_${zeilenId}" style="width:90px" placeholder="Name" />
-        <button type="button" class="btn" onclick="removePlanungsKalenderRow(this)">🗑️</button>
+        <input name="planungs_name_${zeilenId}" style="width:140px" placeholder="Name" />
       `;
 
       const row2 = table.insertRow(-1);
@@ -604,24 +592,11 @@
       wochen.forEach(w => {
         if (w === 39) return; // schon oben mit Rowspan
         const td = row2.insertCell();
-        td.innerHTML = `<input type="text" name="kwtxt_${w}_${zeilenId}" style="width:32px;" placeholder="KW" title="Kurztext für KW ${w}">`;
+        td.innerHTML = `<input type="text" name="kwtxt_${w}_${zeilenId}" style="width:42px;" placeholder="KW" title="Kurztext für KW ${w}">`;
       });
     }
 
-    function removePlanungsKalenderRow(btn) {
-      const tr = btn.closest('tr');
-      const table = document.getElementById("planungsKalenderTable");
-      if (!table) return;
-      const datensatzRows = Array.from(table.querySelectorAll('tr[data-id]'));
-      const uniqueIds = [...new Set(datensatzRows.map(r => r.getAttribute('data-id')))]
-      if (uniqueIds.length <= 1) return; // Nie die letzte entfernen!
-      const zeilenId = tr.getAttribute('data-id');
-      datensatzRows.filter(r => r.getAttribute('data-id') === zeilenId)
-        .forEach(row => row.parentNode.removeChild(row));
-    }
-    window.removePlanungsKalenderRow = removePlanungsKalenderRow;
-
-    // ===== Module-Browser + Autofill (wie in Datei 1) =====
+    // ===== Module-Browser + Autofill =====
     let MODULES = [];
     const modulesById = {};
 
@@ -749,59 +724,59 @@
       const lv = mod?.Lehrveranstaltungen || {};
       setSwsValues(nf(lv.SWS_V), nf(lv.SWS_S), nf(lv.SWS_P));
 
-      // === NEU: Lesende automatisch ausfüllen (Name + Fakultät aus JSON) ===
-(function () {
-  const mv  = mod?.Modulverantwortliche || {};
-  const fak = mod?.Fakultät || '';
-  const fullname = [mv.Anrede, mv.Vorname, mv.Nachname]
-    .filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+      // === Lesende automatisch ausfüllen (Name + Fakultät) ===
+      (function () {
+        const mv  = mod?.Modulverantwortliche || {};
+        const fak = mod?.Fakultät || '';
+        const fullname = [mv.Anrede, mv.Vorname, mv.Nachname]
+          .filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 
-  if (!document.querySelector('input[name^="lesende_name_"]')) {
-    const btn = document.getElementById('lesendeAddBtn');
-    if (btn) btn.click();
-  }
-  const nameInput = document.querySelector('input[name^="lesende_name_"]');
-  const fakInput  = document.querySelector('input[name^="lesende_fakultaet_"]');
+        if (!document.querySelector('input[name^="lesende_name_"]')) {
+          const btn = document.getElementById('lesendeAddBtn');
+          if (btn) btn.click();
+        }
+        const nameInput = document.querySelector('input[name^="lesende_name_"]');
+        const fakInput  = document.querySelector('input[name^="lesende_fakultaet_"]');
 
-  setIfEmpty(nameInput, fullname);
-  setIfEmpty(fakInput,  fak);
-})();
+        setIfEmpty(nameInput, fullname);
+        setIfEmpty(fakInput,  fak);
+      })();
 
-// === NEU: Seminarleiter automatisch ausfüllen (Name + Fakultät) ===
-(function () {
-  const mv  = mod?.Modulverantwortliche || {};
-  const fak = mod?.Fakultät || '';
-  const fullname = [mv.Anrede, mv.Vorname, mv.Nachname].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+      // === Seminarleiter automatisch ausfüllen ===
+      (function () {
+        const mv  = mod?.Modulverantwortliche || {};
+        const fak = mod?.Fakultät || '';
+        const fullname = [mv.Anrede, mv.Vorname, mv.Nachname].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
 
-  if (fullname || fak) {
-    if (!document.querySelector('input[name^="seminarleiter_name_"]')) {
-      document.getElementById('seminarleiterAddBtn')?.click();
-    }
-    const nameInput = document.querySelector('input[name^="seminarleiter_name_"]');
-    const fakInput  = document.querySelector('input[name^="seminarleiter_fakultaet_"]');
-    if (fullname) setIfEmpty(nameInput, fullname);
-    if (fak)      setIfEmpty(fakInput,  fak);
-  }
-})();
+        if (fullname || fak) {
+          if (!document.querySelector('input[name^="seminarleiter_name_"]')) {
+            document.getElementById('seminarleiterAddBtn')?.click();
+          }
+          const nameInput = document.querySelector('input[name^="seminarleiter_name_"]');
+          const fakInput  = document.querySelector('input[name^="seminarleiter_fakultaet_"]');
+          if (fullname) setIfEmpty(nameInput, fullname);
+          if (fak)      setIfEmpty(fakInput,  fak);
+        }
+      })();
 
-// === NEU: Praktikumsverantwortliche automatisch ausfüllen (Name + Fakultät) ===
-(function () {
-  const mv  = mod?.Modulverantwortliche || {};
-  const fak = mod?.Fakultät || '';
-  const fullname = [mv.Anrede, mv.Vorname, mv.Nachname].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+      // === Praktikumsverantwortliche automatisch ausfüllen ===
+      (function () {
+        const mv  = mod?.Modulverantwortliche || {};
+        const fak = mod?.Fakultät || '';
+        thefullname = [mv.Anrede, mv.Vorname, mv.Nachname].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
 
-  if (fullname || fak) {
-    if (!document.querySelector('input[name^="praktikum_name_"]')) {
-      document.getElementById('praktikumAddBtn')?.click();
-    }
-    const nameInput = document.querySelector('input[name^="praktikum_name_"]');
-    const fakInput  = document.querySelector('input[name^="praktikum_fakultaet_"]');
-    if (fullname) setIfEmpty(nameInput, fullname);
-    if (fak)      setIfEmpty(fakInput,  fak);
-  }
-})();
+        if (thefullname || fak) {
+          if (!document.querySelector('input[name^="praktikum_name_"]')) {
+            document.getElementById('praktikumAddBtn')?.click();
+          }
+          const nameInput = document.querySelector('input[name^="praktikum_name_"]');
+          const fakInput  = document.querySelector('input[name^="praktikum_fakultaet_"]');
+          if (thefullname) setIfEmpty(nameInput, thefullname);
+          if (fak)         setIfEmpty(fakInput,  fak);
+        }
+      })();
 
-      // NEU: nach evtl. Semester-Setzung aus Modul -> Abgabetermin & KWs aktualisieren
+      // nach evtl. Semester-Setzung aus Modul -> Abgabetermin & KWs aktualisieren
       updateAbgabeterminFromSemester();
       rebuildPlanungsKalenderTable();
     }
@@ -862,7 +837,6 @@
           if (mt === 'PF')      fa.value = 'Pflichtmodul';
           else if (mt === 'WPF') fa.value = 'Wahlpflichtmodul';
         }
-        // Falls Endpoint auch Semester liefert, kannst du hier optional s.value setzen und dann:
         updateAbgabeterminFromSemester();
         rebuildPlanungsKalenderTable();
       } catch (e) {
@@ -876,7 +850,7 @@
     });
   </script>
 
-  <!-- Optionaler Offline-Fallback wie in Datei 1:
+  <!-- Optionaler Offline-Fallback:
   <script type="application/json" id="moduleJson">[ /* … deine Module … */ ]</script>
   -->
 </body>
