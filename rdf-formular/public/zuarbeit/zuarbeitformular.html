@@ -260,7 +260,7 @@
       const spalten = ["Vorlesung", "Seminar", "Praktikum"];
       const zeilen = [
         { label: "davon SWS", typ: "number", namen: ["sws_v", "sws_s", "sws_p"], werte: [2, 2, 0] },
-        { label: "Raumanforderung", typ: "text", namen: ["raum_v", "raum_s", "raum_p"], werte: ["Gu, Li, Tr", "Z423, Z430", ""] },
+        { label: "Raumanforderung", typ: "text", namen: ["raum_v", "raum_s", "raum_p"], werte: ["", "", ""] },
         { label: "Technikanforderung (Campus – Bereich)", typ: "text", namen: ["technik_v", "technik_s", "technik_p"], werte: ["Beamer/WLAN", "", ""] }
       ];
 
@@ -331,6 +331,7 @@
           <table border="1" style="border-collapse:collapse;width:100%;" id="lesendeTable">
             <tr>
               <th>Fakultät – Bereich / Titel, Name</th>
+              <th>Name</th>
               <th>Seminargruppe</th>
               <th>Erläuterung</th>
               <th>🗑️</th>
@@ -343,6 +344,7 @@
       const row = table.insertRow(-1);
       row.innerHTML = `
         <td><input name="lesende_fakultaet_${lesendeZaehler}" style="width:99%;font-weight:bold" /></td>
+        <td><input name="lesende_name_${lesendeZaehler}"      style="width:99%;font-weight:bold" /></td>
         <td><input name="lesende_gruppe_${lesendeZaehler}" style="width:99%;font-weight:bold" /></td>
         <td><input name="lesende_erklaerung_${lesendeZaehler}" style="width:99%;font-weight:bold" /></td>
         <td><button type="button" class="btn" onclick="removeLesendeRow(this)">🗑️</button></td>
@@ -360,6 +362,7 @@
     }
     window.removeLesendeRow = removeLesendeRow;
 
+    
     // -------- seminarleiter.js --------
     let seminarleiterZaehler = 0;
     document.addEventListener("DOMContentLoaded", function() {
@@ -375,6 +378,7 @@
           <table border="1" style="border-collapse:collapse;width:100%;" id="seminarleiterTable">
             <tr>
               <th>Fakultät – Bereich / Titel, Name</th>
+              <th>Name</th>
               <th>Seminargruppe</th>
               <th>Erläuterung</th>
               <th>🗑️</th>
@@ -387,6 +391,7 @@
       const row = table.insertRow(-1);
       row.innerHTML = `
         <td><input name="seminarleiter_fakultaet_${seminarleiterZaehler}" style="width:99%;font-weight:bold" /></td>
+        <td><input name="seminarleiter_name_${seminarleiterZaehler}"        style="width:99%;font-weight:bold" /></td>
         <td><input name="seminarleiter_gruppe_${seminarleiterZaehler}" style="width:99%;font-weight:bold" /></td>
         <td><input name="seminarleiter_erklaerung_${seminarleiterZaehler}" style="width:99%;font-weight:bold" /></td>
         <td><button type="button" class="btn" onclick="removeSeminarleiterRow(this)">🗑️</button></td>
@@ -417,6 +422,7 @@
           <table border="1" style="border-collapse:collapse;width:100%;" id="praktikumTable">
             <tr>
               <th>Fakultät – Bereich / Titel, Name</th>
+              <th>Name</th>
               <th>Seminargruppe</th>
               <th>Erläuterung</th>
               <th>🗑️</th>
@@ -429,6 +435,7 @@
       const row = table.insertRow(-1);
       row.innerHTML = `
         <td><input name="praktikum_fakultaet_${praktikumZaehler}" style="width:99%;font-weight:bold" /></td>
+        <td><input name="praktikum_name_${praktikumZaehler}"        style="width:99%;font-weight:bold" /></td>
         <td><input name="praktikum_gruppe_${praktikumZaehler}" style="width:99%;font-weight:bold" /></td>
         <td><input name="praktikum_erklaerung_${praktikumZaehler}" style="width:99%;font-weight:bold" /></td>
         <td><button type="button" class="btn" onclick="removePraktikumRow(this)">🗑️</button></td>
@@ -661,6 +668,64 @@
 
       const lv = mod?.Lehrveranstaltungen || {};
       setSwsValues(nf(lv.SWS_V), nf(lv.SWS_S), nf(lv.SWS_P));
+
+      // === NEU: Lesende automatisch ausfüllen (Name + Fakultät aus JSON) ===
+(function () {
+  // Aus JSON: { Modulverantwortliche: {Anrede, Vorname, Nachname}, Fakultät: "..." }
+  const mv  = mod?.Modulverantwortliche || {};
+  const fak = mod?.Fakultät || '';
+  const fullname = [mv.Anrede, mv.Vorname, mv.Nachname]
+    .filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+
+  // Falls noch keine Lesende-Zeile existiert -> eine anlegen
+  if (!document.querySelector('input[name^="lesende_name_"]')) {
+    const btn = document.getElementById('lesendeAddBtn');
+    if (btn) btn.click();
+  }
+
+  // Erste Lesende-Zeile befüllen – nur wenn das Feld leer ist
+  const nameInput = document.querySelector('input[name^="lesende_name_"]');
+  const fakInput  = document.querySelector('input[name^="lesende_fakultaet_"]');
+
+  setIfEmpty(nameInput, fullname);
+  setIfEmpty(fakInput,  fak);
+})();
+
+// === NEU: Seminarleiter automatisch ausfüllen (Name + Fakultät) ===
+(function () {
+  const mv  = mod?.Modulverantwortliche || {};
+  const fak = mod?.Fakultät || '';
+  const fullname = [mv.Anrede, mv.Vorname, mv.Nachname].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+
+  if (fullname || fak) {
+    if (!document.querySelector('input[name^="seminarleiter_name_"]')) {
+      document.getElementById('seminarleiterAddBtn')?.click();
+    }
+    const nameInput = document.querySelector('input[name^="seminarleiter_name_"]');
+    const fakInput  = document.querySelector('input[name^="seminarleiter_fakultaet_"]');
+    if (fullname) setIfEmpty(nameInput, fullname);
+    if (fak)      setIfEmpty(fakInput,  fak);
+  }
+})();
+
+// === NEU: Praktikumsverantwortliche automatisch ausfüllen (Name + Fakultät) ===
+(function () {
+  const mv  = mod?.Modulverantwortliche || {};
+  const fak = mod?.Fakultät || '';
+  const fullname = [mv.Anrede, mv.Vorname, mv.Nachname].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+
+  if (fullname || fak) {
+    if (!document.querySelector('input[name^="praktikum_name_"]')) {
+      document.getElementById('praktikumAddBtn')?.click();
+    }
+    const nameInput = document.querySelector('input[name^="praktikum_name_"]');
+    const fakInput  = document.querySelector('input[name^="praktikum_fakultaet_"]');
+    if (fullname) setIfEmpty(nameInput, fullname);
+    if (fak)      setIfEmpty(fakInput,  fak);
+  }
+})();
+
+
     }
 
     function applySelectedModule(){

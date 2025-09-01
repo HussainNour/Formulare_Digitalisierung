@@ -17,17 +17,17 @@ function saveZuarbeitsblatt(data) {
   ex:semester "${data.semester || ""}" ;
   ex:fakultaet "${data.fakultaet || ""}" ;
   ex:studiengang "${data.studiengang || ""}" ;
-  ex:fachsemester ${data.fachsemester || 0} ;
+  ex:fs ${data.fachsemester || 0} ;
   ex:gruppen "${data.gruppen || ""}" ;
   ex:anzahlStudierendeGruppen ${data.anzahlStudierendeGruppen || 0} ;
-  ex:modulnummer "${data.modulnummer || ""}" ;
-  ex:modulbezeichnung "${data.modulbezeichnung || ""}" ;
+  ex:modulnr "${data.modulnummer || ""}" ;
+  ex:modulname "${data.modulbezeichnung || ""}" ;
   ex:teilmodulnummer "${data.teilmodulnummer || ""}" ;
   ex:teilmodulbezeichnung "${data.teilmodulbezeichnung || ""}" ;
   ex:fachart "${data.fachart || ""}" ;
-  ex:swsV ${data.sws_v || 0} ;
-  ex:swsS ${data.sws_s || 0} ;
-  ex:swsP ${data.sws_p || 0} ;
+  ex:swsVorlesung ${data.sws_v || 0} ;
+  ex:swsSeminar ${data.sws_s || 0} ;
+  ex:swsPraktikum ${data.sws_p || 0} ;
   ex:raumV "${data.raum_v || ""}" ;
   ex:raumS "${data.raum_s || ""}" ;
   ex:raumP "${data.raum_p || ""}" ;
@@ -45,6 +45,7 @@ function saveZuarbeitsblatt(data) {
       return {
         nr,
         fakultaet: data[`lesende_fakultaet_${nr}`],
+        name:      data[`lesende_name_${nr}`]      || "",
         gruppe: data[`lesende_gruppe_${nr}`],
         erklaerung: data[`lesende_erklaerung_${nr}`]
       };
@@ -59,6 +60,7 @@ function saveZuarbeitsblatt(data) {
     lesendeTriples += `
 ${ref} a ex:Lesende ;
   ex:fakultaet "${eintrag.fakultaet}" ;
+  ex:name "${eintrag.name}" ;
   ex:gruppe "${eintrag.gruppe}" ;
   ex:erklaerung "${eintrag.erklaerung}" ;
   ex:zugeordnetZu :Zuarbeitsblatt_${id} .
@@ -79,6 +81,7 @@ ${ref} a ex:Lesende ;
       return {
         nr,
         fakultaet: data[`seminarleiter_fakultaet_${nr}`],
+        name:       data[`seminarleiter_name_${nr}`]      || "",
         gruppe: data[`seminarleiter_gruppe_${nr}`],
         erklaerung: data[`seminarleiter_erklaerung_${nr}`]
       };
@@ -90,6 +93,7 @@ ${ref} a ex:Lesende ;
     seminarleiterTriples += `
 :Seminarleiter_${id}_${index+1} a ex:Seminarleiter ;
   ex:fakultaet "${eintrag.fakultaet}" ;
+  ex:name "${eintrag.name}" ;
   ex:gruppe "${eintrag.gruppe}" ;
   ex:erklaerung "${eintrag.erklaerung}" ;
   ex:zugeordnetZu :Zuarbeitsblatt_${id} .
@@ -106,6 +110,7 @@ const praktikums = Object.keys(data)
     return {
       nr,
       fakultaet: data[`praktikum_fakultaet_${nr}`],
+      name: data[`praktikum_name_${nr}`]      || "",
       gruppe: data[`praktikum_gruppe_${nr}`],
       erklaerung: data[`praktikum_erklaerung_${nr}`]
     };
@@ -117,6 +122,7 @@ praktikums.forEach((eintrag, index) => {
   praktikumsTriples += `
 :Praktikum_${id}_${index+1} a ex:Praktikumsverantwortlicher ;
   ex:fakultaet "${eintrag.fakultaet}" ;
+  ex:name "${eintrag.name}" ;
   ex:gruppe "${eintrag.gruppe}" ;
   ex:erklaerung "${eintrag.erklaerung}" ;
   ex:zugeordnetZu :Zuarbeitsblatt_${id} .
