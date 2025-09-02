@@ -1,15 +1,72 @@
-body { font-family: Arial, sans-serif; margin: 40px; background: #f7f7fa; }
-h1 { margin-bottom: 0.4em; }
-.search-row { margin: 1em 0; }
-.module-list { max-height: 300px; overflow-y: auto; border: 1px solid #ccc; background: #fff; margin-bottom: 2em; }
-.module-list ul { list-style: none; padding: 0; margin: 0; }
-.module-list li { padding: 0.6em 1em; cursor: pointer; border-bottom: 1px solid #eee; }
-.module-list li:hover, .module-list li.active { background: #e8f0ff; }
-.form-section { background: #fff; border: 1px solid #ccc; padding: 2em; border-radius: 8px; box-shadow: 0 1px 4px #0001; }
-label { display: block; margin-top: 1em; }
-input, select { width: 100%; padding: 0.4em; margin-top: 0.2em; }
-.flex { display: flex; gap: 1em; }
-.flex label { flex: 1; }
-.actions { margin-top: 2em; }
-.actions button { padding: 0.7em 1.3em; font-size: 1em; margin-right: 1em; }
-.small { font-size: 0.9em; color: #666; }
+/* ===== Mittel-heller, kontrastreicher Blue-Only-Style ===== */
+:root{
+  --radius:12px;
+  --border:#d1d5db;
+  --text:#0f172a;
+  --bg:#f7f7fa;
+
+  /* Blau (Default) */
+  --blue-bg:#d7e6ff;
+  --blue-bdr:#2f6df6;
+  --blue-ring:rgba(47,109,246,.25);
+}
+
+/* Grundlayout */
+body{font-family:Arial, sans-serif;margin:40px;background:var(--bg);color:var(--text)}
+h1{margin-bottom:.4em;font-weight:800}
+
+/* Suchzeile, Info */
+.search-row{margin:1em 0}
+.small{font-size:.9em;color:#666}
+
+/* Aktionen/Buttons */
+.actions{margin:1em 0 2em}
+.actions button{
+  padding:.7em 1.3em;font-size:1em;margin-right:1em;cursor:pointer;
+  border-radius:10px;border:1px solid var(--blue-bdr);background:#2f6df6;color:#fff;
+  transition:filter .15s,transform .05s
+}
+.actions button:hover{filter:brightness(1.05)}
+.actions button:active{transform:translateY(1px)}
+
+/* Modul-Liste */
+.module-list{
+  max-height:300px;overflow-y:auto;border:2px solid var(--blue-bdr);
+  background:#fff;margin-bottom:2em;border-radius:10px;box-shadow:0 1px 4px #0001
+}
+.module-list ul{list-style:none;margin:0;padding:0}
+.module-list li{
+  padding:.6em 1em;cursor:pointer;border-bottom:1px solid #eee;transition:background-color .15s
+}
+.module-list li:hover,.module-list li.active{background:#e8f0ff}
+
+/* Formular-Karte */
+.form-section{
+  background:#fff;border:1px solid var(--border);padding:2em;border-radius:12px;
+  box-shadow:0 1px 4px #0001
+}
+.form-section h2{margin-top:0}
+
+/* Labels & Inputs */
+label{display:block;margin-top:1em;font-weight:700}
+
+/* Default = BLAU */
+input,select,textarea{
+  width:100%;padding:.6em .75em;margin-top:.25em;min-height:40px;
+  border-radius:var(--radius);border:2px solid var(--blue-bdr);background:var(--blue-bg);
+  color:var(--text);outline:none;transition:box-shadow .18s,background-color .18s,border-color .18s
+}
+input:focus,select:focus,textarea:focus{background:#fff;box-shadow:0 0 0 4px var(--blue-ring)}
+
+/* Flex-Gruppen */
+.flex{display:flex;gap:1em}
+.flex label{flex:1}
+
+/* (Optional) Falls im Markup irgendwo class="is-green" steht,
+   neutralisieren wir es auf das blaue Standard-Design. */
+input.is-green,select.is-green,textarea.is-green{
+  background:var(--blue-bg)!important;border-color:var(--blue-bdr)!important
+}
+input.is-green:focus,select.is-green:focus,textarea.is-green:focus{
+  background:#fff!important;box-shadow:0 0 0 4px var(--blue-ring)!important
+}

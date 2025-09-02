@@ -5,33 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Zuarbeitsformular</title>
   <style>
-    :root { --gap: 10px; }
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; margin: 18px; }
-    h1 { margin-top: 0; }
-    label { font-weight: 600; display: inline-block; margin: 6px 0 3px; }
-    input, select, textarea { margin-bottom: 8px; padding: 6px 8px; }
-    input[type="number"] { width: 120px; }
-    input[readonly] { background: #f7f7f7; }
-    .row { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--gap); align-items: start; }
-    .col-3 { grid-column: span 3; }
-    .col-4 { grid-column: span 4; }
-    .col-6 { grid-column: span 6; }
-    .col-12 { grid-column: span 12; }
-    fieldset { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 18px; }
-    legend { font-weight: 700; padding: 0 6px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; vertical-align: top; }
-    th { background: #f1f1f1; }
-    .btn { padding: 6px 10px; border: 1px solid #999; background: #fafafa; border-radius: 6px; cursor: pointer; }
-    .btn:active { transform: translateY(1px); }
-    .btn-primary { background: #0563bb; color: #fff; border-color: #0563bb; }
-    .hint { background: #f7fbff; border: 1px solid #cfe8ff; padding: 10px; border-radius: 8px; }
+  :root{
+    --radius:12px;
+    --bg:#e6ebf3;
+    --card:#ffffff;
+    --text:#0f172a;
+    --border:#d1d5db;
 
-    /* Ergänzung: Modul-Browser */
-    #modulSelect { width: 100%; height: 12rem; }
-    #moduleFilter { width: 100%; }
-  </style>
+    /* Blau (Default) */
+    --blue-bg:#d7e6ff;
+    --blue-bdr:#2f6df6;
+    --blue-ring:rgba(47,109,246,.25);
+
+    /* Grün (markiert) */
+    --green-bg:#d2f7e6;
+    --green-bdr:#0fa06d;
+    --green-ring:rgba(15,160,109,.28);
+
+    /* Tabellen */
+    --thead-blue:#c4d7ff;
+    --thead-green:#bff0d4;
+    --zebra:#f3f6ff;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:18px;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+    background:var(--bg); color:var(--text);
+  }
+  h1{margin-top:0;font-weight:800}
+
+  /* Karte */
+  form{max-width:1120px;margin:0 auto;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:16px}
+
+  /* Grid */
+  :root{--gap:10px}
+  .row{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--gap);align-items:start}
+  .col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-6{grid-column:span 6}.col-8{grid-column:span 8}.col-9{grid-column:span 9}.col-12{grid-column:span 12}
+
+  label{font-weight:700;display:inline-block;margin:6px 0 3px}
+  .hint{background:#f7fbff;border:1px solid #cfe8ff;padding:10px;border-radius:8px}
+
+  /* DEFAULT = BLAU */
+  input,select,textarea{
+    width:100%;min-height:42px;padding:10px 12px;border-radius:var(--radius);
+    border:2px solid var(--blue-bdr);background:var(--blue-bg);color:var(--text);
+    outline:none;transition:box-shadow .18s,background-color .18s,border-color .18s;
+  }
+  input:focus,select:focus,textarea:focus{background:#fff;box-shadow:0 0 0 4px var(--blue-ring)}
+
+  /* Buttons */
+  .btn{padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:#f8fafc;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:#2f6df6;color:#fff;border-color:#2f6df6}
+
+  /* Fieldsets */
+  fieldset{border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:18px;background:#fff}
+  legend{padding:4px 10px;border-radius:999px;background:#eef2ff;border:1px solid var(--border);font-weight:800}
+
+  /* Tabellen */
+  table{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;text-align:left}
+  th{background:var(--thead-blue);font-weight:800}
+  tr:nth-child(even) td{background:var(--zebra)}
+  #lesendeTable tbody tr:hover,#seminarleiterTable tbody tr:hover,#praktikumTable tbody tr:hover,#gesamtSwsTable tbody tr:hover{background:#eef3ff}
+
+  /* Modul-Browser */
+  #modulSelect{width:100%;height:12rem;border:2px solid var(--blue-bdr);background:var(--blue-bg);border-radius:12px}
+  #moduleFilter{width:100%;border:2px solid var(--blue-bdr);background:var(--blue-bg);border-radius:10px}
+
+  /* ==================== GRÜN: gewünschte Felder ==================== */
+  /* Einzel-Felder */
+  #abgabetermin,
+  #semester,
+  #studiengang,
+  #hochschule,
+  #fakultaet,
+  #fachsemester,
+  #modulnummer,
+  #modulbezeichnung,
+  #fachart,
+  /* SWS-Zellen */
+  input[name="sws_v"],
+  input[name="sws_s"],
+  input[name="sws_p"]{
+    background:var(--green-bg) !important;
+    border-color:var(--green-bdr) !important;
+  }
+  #abgabetermin:focus,#semester:focus,#studiengang:focus,#hochschule:focus,#fakultaet:focus,#fachsemester:focus,
+  #modulnummer:focus,#modulbezeichnung:focus,#fachart:focus,
+  input[name="sws_v"]:focus,input[name="sws_s"]:focus,input[name="sws_p"]:focus{
+    box-shadow:0 0 0 4px var(--green-ring) !important; background:#fff !important;
+  }
+  /* Hochschule ist readonly – trotzdem grün & gut lesbar */
+  #hochschule[readonly]{opacity:1;color:#0b1324;background:var(--green-bg)!important;border-color:var(--green-bdr)!important}
+
+  /* SWS-Überschriften (Vorlesung/Seminar/Praktikum) oben grün */
+  #gesamtSwsTable tr:nth-child(2) th{background:var(--thead-green) !important}
+
+  /* Tabellen: Spalten „Fakultät – Bereich / Titel, Name“ UND „Name“ grün (Header + Inputs) */
+  /* Lesende */
+  #lesendeTable tr:first-child th:nth-child(1),
+  #lesendeTable tr:first-child th:nth-child(2){background:var(--thead-green) !important}
+  #lesendeTable td:nth-child(1) input,
+  #lesendeTable td:nth-child(2) input{background:var(--green-bg)!important;border-color:var(--green-bdr)!important}
+  /* Seminarleiter */
+  #seminarleiterTable tr:first-child th:nth-child(1),
+  #seminarleiterTable tr:first-child th:nth-child(2){background:var(--thead-green) !important}
+  #seminarleiterTable td:nth-child(1) input,
+  #seminarleiterTable td:nth-child(2) input{background:var(--green-bg)!important;border-color:var(--green-bdr)!important}
+  /* Praktikum */
+  #praktikumTable tr:first-child th:nth-child(1),
+  #praktikumTable tr:first-child th:nth-child(2){background:var(--thead-green) !important}
+  #praktikumTable td:nth-child(1) input,
+  #praktikumTable td:nth-child(2) input{background:var(--green-bg)!important;border-color:var(--green-bdr)!important}
+</style>
+
 </head>
 <body>
   <h1>📝 Zuarbeitsformular (Lehrveranstaltung)</h1>
