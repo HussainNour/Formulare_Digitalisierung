@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+  
   <meta charset="UTF-8" />
   <title>Dozentenblatt – Modul-Autofill</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -155,6 +156,30 @@
       }
     }
 
+    // NEU: Parser + Planungssemester (nächstes Semester)
+    function parseSemester(label){
+      if (!label) return null;
+      const s = label.match(/^Sommersemester\s+(\d{4})/i);
+      if (s) return { type:'S', yStart: parseInt(s[1],10), yEnd: parseInt(s[1],10) };
+      const w = label.match(/^Wintersemester\s+(\d{4})\/(\d{2})/i);
+      if (w) {
+        const yStart = parseInt(w[1],10);
+        return { type:'W', yStart, yEnd: yStart+1 };
+      }
+      return null;
+    }
+    function getPlanningSemester(){
+      const cur = getCurrentSemester();
+      const info = parseSemester(cur);
+      if (!info) return cur;
+      if (info.type === 'S') {
+        const y = info.yStart;
+        return `Wintersemester ${y}/${(y+1).toString().slice(-2)}`;
+      } else {
+        return `Sommersemester ${info.yStart + 1}`;
+      }
+    }
+
     function fillSemesterList(selectId = 'semester', yearsBack = 5, yearsForward = 10) {
       const now = new Date();
       const currentYear = now.getFullYear();
@@ -170,14 +195,31 @@
 
       const select = document.getElementById(selectId);
       if (!select) return;
-      const currentSemester = getCurrentSemester();
+      const defaultSemester = getPlanningSemester(); // Planung: nächstes Semester
       semesterList.forEach(sem => {
         const opt = document.createElement('option');
         opt.value = sem;
         opt.textContent = sem;
-        if (sem === currentSemester) opt.selected = true;
+        if (sem === defaultSemester) opt.selected = true;
         select.appendChild(opt);
       });
+    }
+
+    // NEU: Abgabetermin automatisch aus Semester setzen
+    function updateAbgabeterminFromSemester(){
+      const s = document.getElementById('semester');
+      const abgabe = document.querySelector('input[name="abgabetermin"]');
+      if (!s || !abgabe) return;
+      const info = parseSemester(s.value);
+      if (!info) return;
+
+      if (info.type === 'S') {
+        // SoSe YYYY -> 01.04.YYYY
+        abgabe.value = `${info.yStart}-04-01`;
+      } else {
+        // WiSe YYYY/YY -> 01.10.YYYY (kleinstes Jahr)
+        abgabe.value = `${info.yStart}-10-01`;
+      }
     }
 
     function setSemesterFromTurnus(turnus) {
@@ -194,9 +236,16 @@
       }
       const opt = Array.from(s.options).find(o => o.textContent === target);
       if (opt) s.value = opt.value;
+      // NEU: nach Setzen auch Abgabetermin aktualisieren
+      updateAbgabeterminFromSemester();
     }
 
-    document.addEventListener('DOMContentLoaded', () => fillSemesterList());
+    document.addEventListener('DOMContentLoaded', () => {
+      fillSemesterList();
+      updateAbgabeterminFromSemester(); // initial setzen
+      const s = document.getElementById('semester');
+      if (s) s.addEventListener('change', updateAbgabeterminFromSemester);
+    });
   </script>
 
   <!-- titel.js -->
@@ -347,7 +396,7 @@
       if (preset.stg !== undefined)       $('input[name^="einsatz_stg_"]').value       = preset.stg;
       if (preset.fs !== undefined)        $('input[name^="einsatz_fs_"]').value        = preset.fs;
       if (preset.gruppe !== undefined)    $('input[name^="einsatz_gruppe_"]').value    = preset.gruppe;
-            if (preset.modulname !== undefined) $('input[name^="einsatz_modulname_"]').value = preset.modulname;
+      if (preset.modulname !== undefined) $('input[name^="einsatz_modulname_"]').value = preset.modulname;
       if (preset.sws_v !== undefined)     $('input[name^="einsatz_sws_v_"]').value     = preset.sws_v;
       if (preset.sws_s !== undefined)     $('input[name^="einsatz_sws_s_"]').value     = preset.sws_s;
       if (preset.sws_p !== undefined)     $('input[name^="einsatz_sws_p_"]').value     = preset.sws_p;
@@ -818,6 +867,9 @@
 
       // Semester passend zum Turnus wählen
       if (mod?.Turnus) setSemesterFromTurnus(mod.Turnus);
+      // NEU: sicherheitshalber Abgabetermin nachziehen
+      updateAbgabeterminFromSemester();
+
       // globale Felder (nur wenn leer) aus Modulverantwortliche + Fakultät
       const mv = mod?.Modulverantwortliche || {};
       setIfEmpty(document.querySelector('input[name="vorname"]'), mv.Vorname);
@@ -890,7 +942,6 @@
     // --- Titel-Autofill aus JSON.Anrede ---
     function normalizeTitle(s){
       s = (s || '').toLowerCase();
-      // Tabs/Zeilenumbrüche entfernen und Whitespace normalisieren
       s = s.replace(/\t/g, ' ').replace(/\n/g, ' ');
       s = s.replace(/\s+/g, ' ');
       return s.trim();
@@ -958,6 +1009,9 @@
       // globale Felder sanft vorbelegen (nur wenn leer)
       setFakultaetIfEmpty(mod.Fakultät || '');
       if (mod && mod.Turnus) setSemesterFromTurnus(mod.Turnus);
+      // NEU: Abgabetermin nachziehen
+      updateAbgabeterminFromSemester();
+
       var mv = (mod && mod.Modulverantwortliche) ? mod.Modulverantwortliche : {};
       setIfEmpty(document.querySelector('input[name="vorname"]'), mv.Vorname);
       setIfEmpty(document.querySelector('input[name="name"]'), mv.Nachname);
