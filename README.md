@@ -13,13 +13,13 @@
 ## Screenshots
 
 ### Module
-![M1](rdf-formular/Bilder/M1frontend_variante_a_1.png)
-![M2](rdf-formular/Bilder/M1frontend_variante_a_2.png)
-![M3](rdf-formular/Bilder/M1frontend_variante_a_3.png)
-![M4](rdf-formular/Bilder/M1frontend_variante_a_4.png)
-![M5](rdf-formular/Bilder/M1frontend_variante_a_5.png)
-![M6](rdf-formular/Bilder/M1frontend_variante_a_6.png)
-![M7](rdf-formular/Bilder/M1frontend_variante_a_7.png)
+![M1](rdf-formular/Bilder/frontend_variante_a_1.png)
+![M2](rdf-formular/Bilder/frontend_variante_a_2.png)
+![M3](rdf-formular/Bilder/frontend_variante_a_3.png)
+![M4](rdf-formular/Bilder/frontend_variante_a_4.png)
+![M5](rdf-formular/Bilder/frontend_variante_a_5.png)
+![M6](rdf-formular/Bilder/frontend_variante_a_6.png)
+![M7](rdf-formular/Bilder/frontend_variante_a_7.png)
 
 
 **Abhängigkeiten**
