@@ -14,21 +14,13 @@
 
 ### Module
 ![M1](rdf-formular/Bilder/M1frontend_variante_a_1.png)
-![M2](rdf-formular/Bilder/M1frontend_variante_a_1.png)
-![M3](rdf-formular/Bilder/M1frontend_variante_a_1.png)
-![M4](rdf-formular/Bilder/M1frontend_variante_a_1.png)
-![M5](rdf-formular/Bilder/M1frontend_variante_a_1.png)
-![M6](rdf-formular/Bilder/M1frontend_variante_a_1.png)
-![M7](rdf-formular/Bilder/M1frontend_variante_a_1.png)
-### Zuarbeit
-![Z1 – Auswahl](rdf-formular/Bilder/Z1Auswahl.png)
-![Z2](rdf-formular/Bilder/Z2.png)
-![Z3](rdf-formular/Bilder/Z3.png)
+![M2](rdf-formular/Bilder/M1frontend_variante_a_2.png)
+![M3](rdf-formular/Bilder/M1frontend_variante_a_3.png)
+![M4](rdf-formular/Bilder/M1frontend_variante_a_4.png)
+![M5](rdf-formular/Bilder/M1frontend_variante_a_5.png)
+![M6](rdf-formular/Bilder/M1frontend_variante_a_6.png)
+![M7](rdf-formular/Bilder/M1frontend_variante_a_7.png)
 
-### Dozenten
-![D1 – Modul-Auswahl](rdf-formular/Bilder/D1ModulAuswahl.png)
-![D2](rdf-formular/Bilder/D2.png)
-![D3](rdf-formular/Bilder/D3.png)
 
 **Abhängigkeiten**
 - Node.js
