@@ -13,10 +13,13 @@
 ## Screenshots
 
 ### Module
-![M1](rdf-formular/Bilder/M1.png)
-![M2](rdf-formular/Bilder/M2.png)
-![M3](rdf-formular/Bilder/M3.png)
-
+![M1](rdf-formular/Bilder/M1frontend_variante_a_1.png)
+![M2](rdf-formular/Bilder/M1frontend_variante_a_1.png)
+![M3](rdf-formular/Bilder/M1frontend_variante_a_1.png)
+![M4](rdf-formular/Bilder/M1frontend_variante_a_1.png)
+![M5](rdf-formular/Bilder/M1frontend_variante_a_1.png)
+![M6](rdf-formular/Bilder/M1frontend_variante_a_1.png)
+![M7](rdf-formular/Bilder/M1frontend_variante_a_1.png)
 ### Zuarbeit
 ![Z1 – Auswahl](rdf-formular/Bilder/Z1Auswahl.png)
 ![Z2](rdf-formular/Bilder/Z2.png)
